@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLM Tumor VQA — Project Documentation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #11111a;
+            --surface2: #1a1a28;
+            --border: #2a2a3f;
+            --accent: #00d4ff;
+            --accent2: #7c3aed;
+            --accent3: #10b981;
+            --warn: #f59e0b;
+            --danger: #ef4444;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --code-bg: #0d1117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            line-height: 1.7;
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 95%;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            padding: 4rem 0 3rem;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+
+        .header-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-tag::before {
+            content: '';
+            width: 2rem;
+            height: 1px;
+            background: var(--accent);
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 1.1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 300;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-blue {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .badge-purple {
+            background: rgba(124, 58, 237, 0.1);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .badge-green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent3);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-orange {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warn);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        /* TOC */
+        .toc {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 1.5rem 2rem;
+            margin: 3rem 0;
+        }
+
+        .toc-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .toc ol {
+            padding-left: 1.2rem;
+            columns: 2;
+            column-gap: 2rem;
+        }
+
+        @media (min-width: 1000px) {
+            .toc ol {
+                columns: 3;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .toc ol {
+                columns: 4;
+            }
+        }
+
+        .toc li {
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+            break-inside: avoid;
+        }
+
+        .toc a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+        }
+
+        /* Sections */
+        section {
+            padding: 3rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 1.5rem 0 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #a78bfa;
+            margin: 1rem 0 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        /* Code blocks */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.2rem 1.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        pre::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: 0.5rem;
+            right: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        p code,
+        li code {
+            background: var(--surface2);
+            padding: 0.1em 0.4em;
+            border-radius: 3px;
+            color: var(--accent);
+            font-size: 0.85em;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .card h4 {
+            margin-top: 0;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent), var(--accent2));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 1.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.35rem;
+            top: 0.4rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .timeline-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #fff;
+            margin-bottom: 0.4rem;
+        }
+
+        .timeline-body {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        /* Alert boxes */
+        .alert {
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin: 1rem 0;
+            border-left: 3px solid;
+            font-size: 0.9rem;
+        }
+
+        .alert-info {
+            background: rgba(0, 212, 255, 0.05);
+            border-color: var(--accent);
+            color: #a5f3fc;
+        }
+
+        .alert-warn {
+            background: rgba(245, 158, 11, 0.05);
+            border-color: var(--warn);
+            color: #fde68a;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.05);
+            border-color: var(--accent3);
+            color: #a7f3d0;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.05);
+            border-color: var(--danger);
+            color: #fca5a5;
+        }
+
+        .alert strong {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 700;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        th {
+            background: var(--surface2);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid rgba(42, 42, 63, 0.5);
+            color: #cbd5e1;
+            vertical-align: top;
+        }
+
+        tr:hover td {
+            background: rgba(0, 212, 255, 0.03);
+        }
+
+        /* Issue cards */
+        .issue {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .issue-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .issue-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+        }
+
+        .tag-bug {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .tag-fix {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        .tag-optim {
+            background: rgba(124, 58, 237, 0.15);
+            color: #a78bfa;
+        }
+
+        .issue-title {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .issue-body {
+            font-size: 0.88rem;
+            color: var(--muted);
+        }
+
+        /* Metric boxes */
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.2rem;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0.3rem;
+        }
+
+        /* Lists */
+        ul,
+        ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        li strong {
+            color: #fff;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 0;
+            text-align: center;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .toc ol {
+                columns: 1;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Page switcher tab styles */
+        .page-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin: 2rem auto 1rem;
+            padding: 0.4rem;
+            background: rgba(17, 17, 26, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 1rem;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 212, 255, 0.05);
+            max-width: fit-content;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .switch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--muted);
+            border: 1px solid transparent;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .switch-btn:hover {
+            color: var(--accent);
+            background: rgba(0, 212, 255, 0.05);
+            border-color: rgba(0, 212, 255, 0.15);
+        }
+
+        .switch-btn.active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.12) 0%, rgba(124, 58, 237, 0.12) 100%);
+            color: var(--accent);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            box-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
+        }
+
+        @media (max-width: 480px) {
+            .page-switcher {
+                gap: 0.4rem;
+                padding: 0.3rem;
+                width: calc(100% - 2rem);
+                justify-content: space-evenly;
+            }
+            .switch-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.7rem;
+                gap: 0.3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Page Switcher -->
+        <div class="page-switcher">
+            <a href="ml.html" class="switch-btn active"><span class="icon">📊</span> VQA Docs</a>
+            <a href="ml_guideline.html" class="switch-btn"><span class="icon">📚</span> Theory Guide</a>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <div class="header-tag">Project Documentation</div>
+            <h1>Brain Tumor VQA<br>with VLM + QLoRA</h1>
+            <p class="subtitle">// vlm-tumor-vqa · Saobia3i · AUST CSE 4th Year</p>
+            <div class="badges">
+                <span class="badge badge-blue">Python 3.14</span>
+                <span class="badge badge-blue">PyTorch 2.12</span>
+                <span class="badge badge-purple">Qwen2-VL-2B</span>
+                <span class="badge badge-purple">QLoRA / PEFT</span>
+                <span class="badge badge-green">Kaggle T4 GPU</span>
+                <span class="badge badge-green">Gradio</span>
+                <span class="badge badge-orange">Thesis Prep</span>
+            </div>
+        </header>
+
+        <!-- TOC -->
+        <div class="toc">
+            <div class="toc-title">// Table of Contents</div>
+            <ol>
+                <li><a href="#overview">Project Overview</a></li>
+                <li><a href="#stack">Tech Stack</a></li>
+                <li><a href="#phases">All Phases</a></li>
+                <li><a href="#pycharm">PyCharm & Local Setup</a></li>
+                <li><a href="#github">GitHub Repo</a></li>
+                <li><a href="#training">Training Deep Dive</a></li>
+                <li><a href="#issues">Issues & Fixes</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="#deploy">Deployment</a></li>
+                <li><a href="#ml-hierarchy">ML / DL / AI Hierarchy</a></li>
+                <li><a href="#future">Future Approaches</a></li>
+                <li><a href="#thesis">Thesis Connection</a></li>
+            </ol>
+        </div>
+
+        <!-- 1. Overview -->
+        <section id="overview">
+            <div class="section-num">// 01</div>
+            <h2>Project Overview</h2>
+
+            <h3>What</h3>
+            <p>A <strong>Visual Question Answering (VQA)</strong> system for brain MRI scans. Given an MRI image and a
+                natural language question, the model returns a natural language answer — not just a class label.</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon">🧠</div>
+                    <h4>Input</h4>
+                    <p>Brain MRI image + natural language question</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">💬</div>
+                    <h4>Output</h4>
+                    <p>Natural language answer explaining tumor presence and type</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🎯</div>
+                    <h4>Goal</h4>
+                    <p>Thesis preparation — learn full ML pipeline on medical imaging domain</p>
+                </div>
+            </div>
+
+            <h3>Why</h3>
+            <p>Thesis topic is <strong>infant tumor detection</strong>. This project was built to:</p>
+            <ul>
+                <li>Learn the complete ML pipeline hands-on before the real thesis dataset</li>
+                <li>Understand fine-tuning VLMs on medical images</li>
+                <li>Build a CNN baseline to compare against VLM (thesis requires comparison)</li>
+                <li>Learn deployment pipeline (Kaggle → HuggingFace → Gradio)</li>
+            </ul>
+
+            <div class="alert alert-info">
+                <strong>Key insight</strong>
+                CNN says "glioma" — VLM says "Yes, this MRI shows a glioma tumor in the brain." The natural language
+                explanation is the thesis novelty: interpretability in medical diagnosis.
+            </div>
+
+            <h3>How — Big Picture</h3>
+            <pre data-lang="pipeline"><code>Brain MRI Dataset (Kaggle)
+        ↓
+Data Preparation (JSON VQA format)
+        ↓
+EDA (class distribution, sample visualization)
+        ↓
+CNN Baseline (ResNet-50, transfer learning)
+        ↓
+VLM Fine-tuning (Qwen2-VL-2B + QLoRA)
+        ↓
+Inference Testing
+        ↓
+Deploy (HuggingFace Spaces + Gradio UI)</code></pre>
+        </section>
+
+        <!-- 2. Stack -->
+        <section id="stack">
+            <div class="section-num">// 02</div>
+            <h2>Tech Stack — What & Why</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tool</th>
+                        <th>What</th>
+                        <th>Why Used</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>PyTorch</code></td>
+                        <td>Deep learning framework</td>
+                        <td>Industry standard, full control over training loop</td>
+                    </tr>
+                    <tr>
+                        <td><code>Transformers (HF)</code></td>
+                        <td>Model loading, tokenizers, Trainer API</td>
+                        <td>Largest model hub, best VLM support</td>
+                    </tr>
+                    <tr>
+                        <td><code>PEFT</code></td>
+                        <td>LoRA / QLoRA adapter management</td>
+                        <td>Fine-tune large models with minimal VRAM</td>
+                    </tr>
+                    <tr>
+                        <td><code>BitsAndBytes</code></td>
+                        <td>4-bit quantization</td>
+                        <td>Load 2B model in T4's 15GB VRAM</td>
+                    </tr>
+                    <tr>
+                        <td><code>Qwen2-VL-2B</code></td>
+                        <td>Base VLM model</td>
+                        <td>Best small open-source VLM, fine-tuneable, state-of-the-art</td>
+                    </tr>
+                    <tr>
+                        <td><code>ResNet-50</code></td>
+                        <td>CNN baseline model</td>
+                        <td>Proven medical imaging baseline, pretrained on ImageNet</td>
+                    </tr>
+                    <tr>
+                        <td><code>W&B</code></td>
+                        <td>Training tracker</td>
+                        <td>Real-time loss curves, GPU metrics, experiment logging</td>
+                    </tr>
+                    <tr>
+                        <td><code>Kaggle T4 GPU</code></td>
+                        <td>Free GPU training</td>
+                        <td>15GB VRAM, 30hr/week free quota</td>
+                    </tr>
+                    <tr>
+                        <td><code>Gradio</code></td>
+                        <td>UI framework</td>
+                        <td>5 lines of code → full web UI, HF Spaces native</td>
+                    </tr>
+                    <tr>
+                        <td><code>HuggingFace Hub</code></td>
+                        <td>Model storage + deployment</td>
+                        <td>Free model hosting, Spaces for live demo</td>
+                    </tr>
+                    <tr>
+                        <td><code>PyCharm</code></td>
+                        <td>Local IDE</td>
+                        <td>Best Python debugging, notebook support, venv management</td>
+                    </tr>
+                    <tr>
+                        <td><code>GitHub</code></td>
+                        <td>Version control</td>
+                        <td>Code sync between local and Kaggle</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Why Qwen2-VL over Gemini/GPT-4V</h3>
+            <div class="alert alert-warn">
+                <strong>Critical for thesis</strong>
+                Gemini and GPT-4V are API-only — you cannot fine-tune them on your dataset, cannot see internals, and
+                cannot publish "we used Gemini API" as thesis work. Thesis requires: your training, your evaluation,
+                your contribution. Qwen2-VL is open-source, fine-tuneable, and runs on free GPUs.
+            </div>
+        </section>
+
+        <!-- 3. Phases -->
+        <section id="phases">
+            <div class="section-num">// 03</div>
+            <h2>All Phases — What, Why, How</h2>
+
+            <div class="timeline">
+
+                <div class="timeline-item">
+                    <div class="timeline-label">Phase 0 · Day 1</div>
+                    <div class="timeline-title">Account & Environment Setup</div>
+                    <div class="timeline-body">
+                        Created accounts on Kaggle, HuggingFace, W&B, GitHub. Installed PyCharm, Python 3.14. Created
+                        <code>vlm-env</code> virtual environment. Installed core packages: torch, transformers, peft,
+                        accelerate, datasets, wandb, gradio.
+                        <br><br>
+                        <strong>Why:</strong> Isolated environment prevents package conflicts. Each project needs its
+                        own "bubble."
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-label">Phase 1 · Day 2-3</div>
+                    <div class="timeline-title">PyTorch Fundamentals</div>
+                    <div class="timeline-body">
+                        Learned tensors, autograd, and training loops. Verified PyTorch working locally. Connected W&B
+                        and logged first training run (linear regression: learned w=5.0 from scratch).
+                        <br><br>
+                        <strong>Why:</strong> Before fine-tuning a 2B model, must understand what backprop and gradient
+                        descent actually do. Confirmed with: gradient of x² at x=2 = 4.0 ✓
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-label">Phase 2 · Day 4</div>
+                    <div class="timeline-title">Dataset Preparation</div>
+                    <div class="timeline-body">
+                        Downloaded Brain Tumor MRI Dataset from Kaggle (7000 images, 4 classes: glioma, meningioma,
+                        notumor, pituitary). Converted to VQA format (image + question + answer JSON). Generated 5600
+                        train + 1600 test samples.
+                        <br><br>
+                        <strong>Why:</strong> VLM needs image-text pairs, not just image-label pairs. Each image gets a
+                        natural language question and answer.
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-label">Phase 3 · Day 4</div>
+                    <div class="timeline-title">EDA (Exploratory Data Analysis)</div>
+                    <div class="timeline-body">
+                        Ran <code>01_eda.ipynb</code> in PyCharm. Visualized class distribution (perfectly balanced:
+                        1400 each). Visualized sample MRI images per class.
+                        <br><br>
+                        <strong>Why:</strong> Balanced dataset = no class imbalance problem. Confirmed data loaded
+                        correctly before training.
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-label">Phase 4 · Day 5-6</div>
+                    <div class="timeline-title">CNN Baseline (Kaggle)</div>
+                    <div class="timeline-body">
+                        Fine-tuned ResNet-50 (pretrained on ImageNet) on brain tumor dataset. Replaced final FC layer
+                        (2048→4). Trained 10 epochs on Kaggle T4 GPU. Logged to W&B.
+                        <br><br>
+                        <strong>Result:</strong> Train 99.6%, Val 95.25% accuracy.
+                        <br><br>
+                        <strong>Why:</strong> Thesis requires CNN vs VLM comparison. This is the baseline everything
+                        else is measured against.
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-label">Phase 5 · Day 7-12</div>
+                    <div class="timeline-title">QLoRA Fine-tuning (Kaggle)</div>
+                    <div class="timeline-body">
+                        Loaded Qwen2-VL-2B in 4-bit quantization. Applied LoRA adapters (r=8, trainable: 0.19% of
+                        params). Fixed dataset with proper label masking. Trained 5 epochs, 800 samples, ~65 minutes.
+                        <br><br>
+                        <strong>Result:</strong> Loss 17.1 → 5.847. Inference: 2/4 correct on sample test.
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-label">Phase 6</div>
+                    <div class="timeline-title">Deploy</div>
+                    <div class="timeline-body">
+                        Uploaded LoRA adapter weights to HuggingFace Hub. Built Gradio app with 2 tabs: VQA UI + Model
+                        Performance. Deployed to HuggingFace Spaces (free CPU).
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 4. PyCharm -->
+        <section id="pycharm">
+            <div class="section-num">// 04</div>
+            <h2>PyCharm & Local Setup</h2>
+
+            <p>PyCharm was used as the <strong>local development environment</strong> — not for GPU training. All
+                training happened on Kaggle.</p>
+
+            <h3>What was done locally in PyCharm</h3>
+            <ul>
+                <li>Created <code>vlm-env</code> virtual environment (Python 3.14)</li>
+                <li>Installed all packages via pip in the terminal</li>
+                <li>Wrote <code>data/prepare_dataset.py</code> — converts image folders to VQA JSON format</li>
+                <li>Ran <code>notebooks/01_eda.ipynb</code> — class distribution chart + sample image visualization</li>
+                <li>Wrote training notebook code before pushing to Kaggle</li>
+                <li>Tested PyTorch basics (<code>test.py</code> — autograd verification, W&B connection)</li>
+            </ul>
+
+            <h3>Local vs Kaggle Split</h3>
+            <pre data-lang="workflow"><code>PyCharm (Local, CPU)          Kaggle (Cloud, GPU T4)
+─────────────────────         ──────────────────────
+Code writing                  Actual model training
+Dataset preparation           CNN baseline (10 epochs)
+EDA notebooks                 VLM fine-tuning (5 epochs)
+Git commits                   Model saving
+W&B setup test                Upload to HF Hub</code></pre>
+
+            <div class="alert alert-info">
+                <strong>Rule</strong> Never train heavy models locally without GPU. Local = code + explore. Cloud =
+                train.
+            </div>
+        </section>
+
+        <!-- 5. GitHub -->
+        <section id="github">
+            <div class="section-num">// 05</div>
+            <h2>GitHub Repository</h2>
+
+            <p>Repo: <code>github.com/Saobia3i/vlm-tumor-vqa</code></p>
+
+            <h3>Why we created the repo</h3>
+            <ul>
+                <li><strong>Version control</strong> — track every change, revert if needed</li>
+                <li><strong>Code sync</strong> — write in PyCharm, pull in Kaggle notebook</li>
+                <li><strong>Portfolio</strong> — thesis supervisor can see your work</li>
+                <li><strong>Backup</strong> — local files can be lost, GitHub persists</li>
+            </ul>
+
+            <h3>What's in the repo</h3>
+            <pre data-lang="tree"><code>vlm-tumor-vqa/
+├── data/
+│   └── prepare_dataset.py    ← VQA format converter
+├── notebooks/
+│   └── 01_eda.ipynb          ← EDA visualization
+├── .gitignore                ← excludes vlm-env/, data/, wandb/
+└── README.md</code></pre>
+
+            <h3>Why data/ and vlm-env/ are gitignored</h3>
+            <ul>
+                <li><code>data/</code> — 7000 images = hundreds of MBs, GitHub limit is 100MB per file</li>
+                <li><code>vlm-env/</code> — thousands of installed packages, regenerated via <code>pip install</code>
+                </li>
+                <li><code>wandb/</code> — auto-generated logs, not source code</li>
+            </ul>
+        </section>
+
+        <!-- 6. Training Deep Dive -->
+        <section id="training">
+            <div class="section-num">// 06</div>
+            <h2>Training Deep Dive</h2>
+
+            <h3>What is Transfer Learning</h3>
+            <p>Instead of training from scratch (needs millions of images, weeks of compute), we take a model already
+                trained on a large dataset and adapt it to our task.</p>
+            <pre data-lang="concept"><code>ResNet-50 pretrained on ImageNet (1.2M images, 1000 classes)
+        ↓
+Freeze most layers (they already know edges, shapes, textures)
+        ↓
+Replace last layer: 1000 classes → 4 classes
+        ↓
+Fine-tune on 5600 tumor images
+        ↓
+Result: 95.25% accuracy in 10 epochs (~5 minutes)</code></pre>
+
+            <h3>What is QLoRA</h3>
+            <p>Fine-tuning a 2B parameter model normally requires 16GB+ VRAM. QLoRA makes it possible on a 15GB T4 GPU.
+            </p>
+            <pre data-lang="concept"><code>Step 1: Load model in 4-bit (Q = Quantization)
+        2B params × 4 bits = ~1GB instead of ~4GB
+
+Step 2: Freeze all original weights
+
+Step 3: Add small LoRA adapter matrices (Lo = Low Rank)
+        Only 4.3M params trainable (0.19% of 2.2B)
+
+Step 4: Train only the adapters
+        Gradients computed only for adapters → less memory
+
+Step 5: Save only adapter weights (~50MB, not 4GB)</code></pre>
+
+            <h3>Label Masking — The Critical Fix</h3>
+            <p>This was the most important optimization. Without it, loss was stuck at 9.3.</p>
+            <pre data-lang="python"><code># WRONG — loss computed on question + answer
+labels = input_ids.clone()   # all tokens included
+
+# CORRECT — loss only on answer tokens
+labels = input_ids.clone()
+labels[:q_len] = -100        # -100 = ignore in loss computation
+
+# Why: Model should learn to generate answers, not memorize questions
+# With masking: loss 17.1 → 5.847
+# Without masking: loss stuck at 9.3</code></pre>
+
+            <h3>Training Configuration (Final)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                        <th>Why</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>epochs</td>
+                        <td>5</td>
+                        <td>Enough for convergence on 800 samples</td>
+                    </tr>
+                    <tr>
+                        <td>batch_size</td>
+                        <td>2</td>
+                        <td>T4 VRAM limit</td>
+                    </tr>
+                    <tr>
+                        <td>gradient_accumulation</td>
+                        <td>4</td>
+                        <td>Effective batch = 8</td>
+                    </tr>
+                    <tr>
+                        <td>learning_rate</td>
+                        <td>1e-4</td>
+                        <td>Standard for LoRA fine-tuning</td>
+                    </tr>
+                    <tr>
+                        <td>lr_scheduler</td>
+                        <td>cosine</td>
+                        <td>Smooth decay, avoids sharp drops</td>
+                    </tr>
+                    <tr>
+                        <td>warmup_steps</td>
+                        <td>50</td>
+                        <td>Stable start before full lr</td>
+                    </tr>
+                    <tr>
+                        <td>optimizer</td>
+                        <td>paged_adamw_8bit</td>
+                        <td>Memory-efficient AdamW</td>
+                    </tr>
+                    <tr>
+                        <td>LoRA rank r</td>
+                        <td>8</td>
+                        <td>Balance between capacity and memory</td>
+                    </tr>
+                    <tr>
+                        <td>max_length</td>
+                        <td>384</td>
+                        <td>Enough for question + answer</td>
+                    </tr>
+                    <tr>
+                        <td>quantization</td>
+                        <td>nf4 4-bit</td>
+                        <td>Best quality/memory tradeoff</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 7. Issues -->
+        <section id="issues">
+            <div class="section-num">// 07</div>
+            <h2>Issues Faced & Fixed</h2>
+
+            <div class="issue">
+                <div class="issue-header">
+                    <span class="issue-tag tag-bug">Bug</span>
+                    <span class="issue-title">scipy shadows torch — ImportError on first run</span>
+                </div>
+                <div class="issue-body">
+                    <strong>Error:</strong> <code>attempted relative import beyond top-level package</code> from
+                    scipy/_lib/array_api_compat/torch/__init__.py<br>
+                    <strong>Cause:</strong> scipy had a torch submodule that conflicted with actual PyTorch. Python 3.14
+                    too new.<br>
+                    <strong>Fix:</strong> <code>pip uninstall scipy -y</code> then
+                    <code>pip install scipy==1.13.1</code><br>
+                    <strong>Lesson:</strong> For ML projects, use Python 3.10 or 3.11 — not bleeding edge versions.
+                </div>
+            </div>
+
+            <div class="issue">
+                <div class="issue-header">
+                    <span class="issue-tag tag-bug">Bug</span>
+                    <span class="issue-title">Wrong PyCharm interpreter — running .venv instead of vlm-env</span>
+                </div>
+                <div class="issue-body">
+                    <strong>Cause:</strong> PyCharm auto-created .venv, but packages installed in manually created
+                    vlm-env.<br>
+                    <strong>Fix:</strong> File → Settings → Python Interpreter → point to
+                    <code>vlm-env\Scripts\python.exe</code><br>
+                    <strong>Lesson:</strong> Always create environment through PyCharm, not manually. One project = one
+                    environment.
+                </div>
+            </div>
+
+            <div class="issue">
+                <div class="issue-header">
+                    <span class="issue-tag tag-bug">Bug</span>
+                    <span class="issue-title">prepare_dataset.py — "folder not found" warning</span>
+                </div>
+                <div class="issue-body">
+                    <strong>Cause:</strong> Script run from wrong working directory. Relative path
+                    <code>data/Training</code> resolved incorrectly.<br>
+                    <strong>Fix:</strong> <code>cd E:\pycharm\PythonProject</code> then run script from project
+                    root.<br>
+                    <strong>Lesson:</strong> Always run scripts from project root. Use <code>os.getcwd()</code> to
+                    verify.
+                </div>
+            </div>
+
+            <div class="issue">
+                <div class="issue-header">
+                    <span class="issue-tag tag-bug">Bug</span>
+                    <span class="issue-title">Kaggle GPU session cap reached</span>
+                </div>
+                <div class="issue-body">
+                    <strong>Cause:</strong> Kaggle allows only 1 active GPU session at a time. CNN notebook still
+                    running when VLM notebook started.<br>
+                    <strong>Fix:</strong> Stop CNN notebook session before starting VLM notebook.<br>
+                    <strong>Lesson:</strong> Always stop idle GPU sessions on Kaggle.
+                </div>
+            </div>
+
+            <div class="issue">
+                <div class="issue-header">
+                    <span class="issue-tag tag-bug">Bug</span>
+                    <span class="issue-title">Training loss stuck at 9.3 — model not learning</span>
+                </div>
+                <div class="issue-body">
+                    <strong>Cause:</strong> No label masking. Loss computed on entire sequence including question
+                    tokens. Model optimized for wrong objective.<br>
+                    <strong>Fix:</strong> Added label masking — set question token labels to <code>-100</code> so loss
+                    only computed on answer tokens.<br>
+                    <strong>Result:</strong> Loss immediately dropped from 9.3 to 5.847.<br>
+                    <strong>Lesson:</strong> In VLM fine-tuning, label masking is mandatory — not optional.
+                </div>
+            </div>
+
+            <div class="issue">
+                <div class="issue-header">
+                    <span class="issue-tag tag-bug">Bug</span>
+                    <span class="issue-title">Training frozen at Epoch 2.07 — OOM during evaluation</span>
+                </div>
+                <div class="issue-body">
+                    <strong>Cause:</strong> <code>eval_strategy="epoch"</code> triggered evaluation on 200 test samples.
+                    Combined train + eval VRAM exceeded T4's 15GB.<br>
+                    <strong>Fix:</strong> Removed <code>eval_strategy</code> and <code>eval_dataset</code> from
+                    TrainingArguments.<br>
+                    <strong>Lesson:</strong> On T4 GPU, run evaluation separately after training, not during.
+                </div>
+            </div>
+
+            <div class="issue">
+                <div class="issue-header">
+                    <span class="issue-tag tag-bug">Bug</span>
+                    <span class="issue-title">NameError: model/train_ds not defined after session restart</span>
+                </div>
+                <div class="issue-body">
+                    <strong>Cause:</strong> Kaggle session restarted (timeout/refresh), all in-memory variables
+                    lost.<br>
+                    <strong>Fix:</strong> Re-run all cells from Cell 1 sequentially.<br>
+                    <strong>Lesson:</strong> Notebook state lives in memory — always save checkpoints. Never skip cells.
+                </div>
+            </div>
+
+            <div class="issue">
+                <div class="issue-header">
+                    <span class="issue-tag tag-bug">Bug</span>
+                    <span class="issue-title">pip install taking 20+ minutes on Kaggle</span>
+                </div>
+                <div class="issue-body">
+                    <strong>Cause:</strong> Installing all packages including pre-installed ones (transformers, wandb
+                    already in Kaggle image).<br>
+                    <strong>Fix:</strong> Only install missing packages:
+                    <code>!pip install -q peft trl bitsandbytes qwen-vl-utils</code><br>
+                    <strong>Lesson:</strong> Kaggle pre-installs most ML packages. Only install what's missing.
+                </div>
+            </div>
+
+            <div class="issue">
+                <div class="issue-header">
+                    <span class="issue-tag tag-optim">Optimization</span>
+                    <span class="issue-title">prepare_model_for_kbit_training missing</span>
+                </div>
+                <div class="issue-body">
+                    <strong>Problem:</strong> Loading 4-bit model without preparing it for kbit training causes
+                    incorrect gradient flow.<br>
+                    <strong>Fix:</strong> Added <code>model = prepare_model_for_kbit_training(model)</code> before
+                    applying LoRA.<br>
+                    <strong>Why important:</strong> This enables gradient checkpointing and fixes layer norms for stable
+                    training.
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 8. Results -->
+        <section id="results">
+            <div class="section-num">// 08</div>
+            <h2>Results</h2>
+
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-value">95.25%</div>
+                    <div class="metric-label">CNN Val Accuracy</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">5.847</div>
+                    <div class="metric-label">VLM Final Loss</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">0.19%</div>
+                    <div class="metric-label">Trainable Params</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">~65m</div>
+                    <div class="metric-label">Training Time</div>
+                </div>
+            </div>
+
+            <h3>CNN Training (10 epochs)</h3>
+            <pre data-lang="results"><code>Epoch 1  | loss 56.5 | train 0.893 | val 0.899
+Epoch 2  | loss 11.6 | train 0.980 | val 0.943
+Epoch 5  | loss  3.7 | train 0.994 | val 0.939
+Epoch 10 | loss  2.8 | train 0.996 | val 0.953  ← baseline</code></pre>
+
+            <h3>VLM Training (5 epochs, with label masking)</h3>
+            <pre data-lang="results"><code>Step 10  | loss 17.124  ← start
+Step 50  | loss  7.235  ← dropping fast
+Step 100 | loss  5.879
+Step 200 | loss  5.849
+Step 500 | loss  5.847  ← converged</code></pre>
+
+            <h3>Sample Inference</h3>
+            <pre data-lang="inference"><code>True: notumor   → Model: "No tumor detected. The brain MRI appears normal." ✅
+True: pituitary → Model: "Yes, this MRI shows a pituitary tumor."           ✅
+True: glioma    → Model: "Yes, this MRI shows a pituitary tumor."           ❌
+True: meningioma→ Model: "No tumor detected."                               ❌</code></pre>
+
+            <div class="alert alert-warn">
+                <strong>50% accuracy on 4 samples</strong>
+                Model confuses glioma/meningioma. Root cause: only 800 training samples (200 per class), answers too
+                similar in structure. Fix: more data + more distinctive answers + more epochs.
+            </div>
+        </section>
+
+        <!-- 9. Deploy -->
+        <section id="deploy">
+            <div class="section-num">// 09</div>
+            <h2>Deployment Pipeline</h2>
+
+            <pre data-lang="pipeline"><code>Kaggle Training
+    ↓ model.save_pretrained("/kaggle/working/qwen2vl-tumor-lora")
+HuggingFace Hub (chilli3i/qwen2vl-tumor-lora)
+    ↓ api.upload_folder(...)
+HuggingFace Spaces (chilli3i/vlm-tumor-vqa)
+    ↓ app.py loads model from Hub
+Gradio Web UI (public URL, free)</code></pre>
+
+            <h3>Why this deployment stack</h3>
+            <ul>
+                <li><strong>HF Hub</strong> — free model storage, versioned, public URL for loading</li>
+                <li><strong>HF Spaces</strong> — free hosting, native Gradio support, auto-deploys on push</li>
+                <li><strong>Gradio</strong> — fastest UI for ML demos, built-in image/text components</li>
+            </ul>
+
+            <h3>Updating the model after retraining</h3>
+            <pre data-lang="bash"><code># On Kaggle, after better training:
+api.upload_folder(
+    folder_path="/kaggle/working/qwen2vl-tumor-lora",
+    repo_id="chilli3i/qwen2vl-tumor-lora",
+    token=HF_TOKEN,
+)
+# Space automatically reloads — no app.py change needed</code></pre>
+        </section>
+
+        <!-- 10. ML Hierarchy -->
+        <section id="ml-hierarchy">
+            <div class="section-num">// 10</div>
+            <h2>AI / ML / DL — The Hierarchy</h2>
+
+            <pre data-lang="hierarchy"><code>Artificial Intelligence (AI)
+└── Machine Learning (ML)
+    ├── Classical ML (sklearn)
+    │   ├── SVM, RandomForest, KNN
+    │   └── You manually define features
+    └── Deep Learning (DL)
+        ├── CNN (ResNet, EfficientNet)
+        ├── Transformer (BERT, GPT)
+        └── Vision Language Model (VLM) ← what you built
+            ├── Vision Encoder (ViT)
+            ├── Projector layer
+            └── LLM Backbone (Qwen2)</code></pre>
+
+            <h3>What you actually did — honest assessment</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Activity</th>
+                        <th>Level</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>API call only (Gemini)</td>
+                        <td>Level 1</td>
+                        <td>❌ Not done</td>
+                    </tr>
+                    <tr>
+                        <td>Fine-tuning pretrained models</td>
+                        <td>Level 2</td>
+                        <td>✅ Done</td>
+                    </tr>
+                    <tr>
+                        <td>Understanding architecture internals</td>
+                        <td>Level 3</td>
+                        <td>⬜ Next step</td>
+                    </tr>
+                    <tr>
+                        <td>Custom model architecture</td>
+                        <td>Level 4</td>
+                        <td>⬜ Thesis goal</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="alert alert-success">
+                <strong>Correct framing</strong>
+                You did Transfer Learning + Parameter-Efficient Fine-Tuning (PEFT). This is what 95% of real-world ML
+                engineering looks like. Nobody trains from scratch except Google/Meta.
+            </div>
+        </section>
+
+        <!-- 11. Future -->
+        <section id="future">
+            <div class="section-num">// 11</div>
+            <h2>Future Approaches — Best Practices</h2>
+
+            <h3>To improve this project's accuracy</h3>
+            <ul>
+                <li><strong>More data</strong> — increase from 800 to 3000+ samples</li>
+                <li><strong>Multiple QA per image</strong> — 4 questions × 1400 images = 5600 samples automatically</li>
+                <li><strong>More distinctive answers</strong> — describe location, appearance, density (not just tumor
+                    type)</li>
+                <li><strong>More epochs</strong> — 10-15 epochs instead of 5</li>
+                <li><strong>Larger model</strong> — Qwen2-VL-7B on A100 GPU</li>
+                <li><strong>LLaVA-Med</strong> — medical-specific VLM, better domain alignment</li>
+            </ul>
+
+            <h3>For your thesis (infant tumor detection)</h3>
+            <ul>
+                <li><strong>DICOM preprocessing</strong> — use pydicom to convert raw scans → normalized PNG</li>
+                <li><strong>Radiologist annotations</strong> — answers must come from medical expert, not just class
+                    labels</li>
+                <li><strong>Sensitivity/Specificity metrics</strong> — more important than accuracy in medical AI</li>
+                <li><strong>Grad-CAM visualization</strong> — show what the model "looks at" when predicting</li>
+                <li><strong>Dataset augmentation</strong> — rotation, flip, brightness for medical images</li>
+                <li><strong>Cross-validation</strong> — k-fold CV for small medical datasets</li>
+            </ul>
+
+            <h3>ML Engineering best practices learned</h3>
+            <ul>
+                <li>Always use label masking in VLM fine-tuning</li>
+                <li>Use <code>prepare_model_for_kbit_training()</code> before LoRA on quantized models</li>
+                <li>Don't run evaluation during training on T4 — OOM risk</li>
+                <li>Start with small dataset (800) to verify pipeline, then scale</li>
+                <li>Track everything with W&B — loss curve shows if training is healthy</li>
+                <li>Use Python 3.10/3.11 for ML — not bleeding edge versions</li>
+                <li>Save checkpoints frequently — Kaggle sessions timeout</li>
+                <li>CNN baseline first — gives reference point for VLM comparison</li>
+            </ul>
+
+            <h3>Tools to learn next</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tool</th>
+                        <th>Why</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Grad-CAM</td>
+                        <td>Visualize what CNN/VLM focuses on — critical for medical AI explainability</td>
+                    </tr>
+                    <tr>
+                        <td>pydicom</td>
+                        <td>Read DICOM files from real medical scanners for thesis dataset</td>
+                    </tr>
+                    <tr>
+                        <td>torchmetrics</td>
+                        <td>Proper AUC-ROC, sensitivity, specificity computation</td>
+                    </tr>
+                    <tr>
+                        <td>LLaVA-Med</td>
+                        <td>Medical-specific VLM, better starting point than general Qwen2-VL</td>
+                    </tr>
+                    <tr>
+                        <td>vLLM</td>
+                        <td>Fast inference serving for production deployment</td>
+                    </tr>
+                    <tr>
+                        <td>DVC</td>
+                        <td>Data version control — track dataset changes like Git tracks code</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 12. Thesis -->
+        <section id="thesis">
+            <div class="section-num">// 12</div>
+            <h2>Thesis Connection</h2>
+
+            <p>Thesis topic: <strong>Infant Tumor Detection</strong> using your own dataset.</p>
+
+            <h3>How this project prepares you</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon">🔧</div>
+                    <h4>Pipeline</h4>
+                    <p>Full ML pipeline done end-to-end. Thesis = same pipeline, different dataset.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📊</div>
+                    <h4>Baseline</h4>
+                    <p>Know how to build CNN baseline. Thesis needs CNN vs VLM comparison.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🧬</div>
+                    <h4>Domain</h4>
+                    <p>Brain MRI ≈ infant brain MRI. Same preprocessing, same model architecture.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📝</div>
+                    <h4>Writing</h4>
+                    <p>All issues, fixes, metrics documented here → methodology section of thesis.</p>
+                </div>
+            </div>
+
+            <h3>Thesis argument (based on this project)</h3>
+            <div class="alert alert-success">
+                <strong>Key finding to write about</strong>
+                CNN baseline: 95.25% accuracy — classifies only. Fine-tuned VLM: lower accuracy but provides natural
+                language explanation. In medical diagnosis, explainability matters as much as accuracy. A doctor needs
+                to know WHY, not just WHAT.
+            </div>
+
+            <h3>Proposed thesis methodology</h3>
+            <pre data-lang="thesis"><code>1. Dataset: Your infant tumor dataset (DICOM → PNG)
+2. Preprocessing: pydicom + normalization + augmentation
+3. Baseline: ResNet-50 CNN (same as this project)
+4. VLM: Qwen2-VL or LLaVA-Med fine-tuned with QLoRA
+5. Metrics: Accuracy + Sensitivity + Specificity + AUC-ROC
+6. Explainability: Grad-CAM visualization
+7. Comparison: CNN vs VLM accuracy + explanation quality
+8. Conclusion: VLM provides better clinical utility despite lower raw accuracy</code></pre>
+        </section>
+
+        <footer>
+            <p>vlm-tumor-vqa · Saobia3i · AUST CSE 4th Year · Built with PyTorch + Qwen2-VL + QLoRA</p>
+            <p style="margin-top:0.5rem; color: #334155;">// end of documentation</p>
+        </footer>
+
+    </div>
+</body>
+
+</html>

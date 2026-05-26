@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Engineering — Complete Guide</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f0e8;
+            --surface: #ede8df;
+            --surface2: #e0d8cc;
+            --ink: #1a1510;
+            --ink2: #3d3428;
+            --muted: #8a7d6b;
+            --accent: #c84b2f;
+            --accent2: #2f6bc8;
+            --accent3: #2a8c4a;
+            --border: #c8bfb0;
+            --code-bg: #1a1510;
+            --code-text: #f0e8d8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Fraunces', Georgia, serif;
+            line-height: 1.75;
+            font-size: 16px;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Grain texture overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.4;
+        }
+
+        /* Sidebar nav */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 220px;
+            background: var(--ink);
+            color: var(--bg);
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            line-height: 1.4;
+        }
+
+        .sidebar nav a {
+            display: block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(245, 240, 232, 0.5);
+            text-decoration: none;
+            padding: 0.3rem 0;
+            letter-spacing: 0.05em;
+            transition: color 0.2s;
+            border-left: 2px solid transparent;
+            padding-left: 0.8rem;
+        }
+
+        .sidebar nav a:hover {
+            color: var(--bg);
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-section {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.55rem;
+            color: rgba(245, 240, 232, 0.25);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin: 1.2rem 0 0.3rem;
+        }
+
+        /* Main content */
+        main {
+            margin-left: 220px;
+            min-height: 100vh;
+        }
+
+        /* Hero */
+        .hero {
+            background: var(--ink);
+            color: var(--bg);
+            padding: 5rem 4rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: 'ML';
+            position: absolute;
+            right: -2rem;
+            top: -3rem;
+            font-family: 'Fraunces', serif;
+            font-size: 20rem;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.03);
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .hero-eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            max-width: 700px;
+        }
+
+        .hero h1 em {
+            font-style: italic;
+            color: #f0c88a;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: rgba(245, 240, 232, 0.65);
+            max-width: 550px;
+            font-weight: 300;
+        }
+
+        /* Content sections */
+        .content {
+            max-width: 95%;
+            width: 100%;
+            padding: 0 4rem;
+        }
+
+        section {
+            padding: 4rem 0 3rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sec-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.8rem;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--ink);
+            margin-bottom: 1.5rem;
+            line-height: 1.15;
+        }
+
+        h3 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent2);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin: 2rem 0 0.8rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin: 1.2rem 0 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--ink2);
+        }
+
+        /* Pull quotes */
+        .pullquote {
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 2rem 0;
+            background: var(--surface);
+            font-size: 1.15rem;
+            font-style: italic;
+            font-weight: 300;
+            color: var(--ink);
+        }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            border-radius: 6px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.2rem 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.65;
+            position: relative;
+            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        pre .comment {
+            color: #6a8c6a;
+        }
+
+        pre .key {
+            color: #f0a866;
+        }
+
+        pre .val {
+            color: #88c8f0;
+        }
+
+        pre .str {
+            color: #c8f088;
+        }
+
+        code {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85em;
+        }
+
+        p code,
+        li code {
+            background: var(--surface2);
+            padding: 0.1em 0.4em;
+            border-radius: 3px;
+            color: var(--accent);
+        }
+
+        /* Definition boxes */
+        .def-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--accent);
+            border-radius: 0 0 6px 6px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .def-box .def-term {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .def-box p {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Comparison table */
+        .compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .compare-cell {
+            background: var(--bg);
+            padding: 1.2rem;
+        }
+
+        .compare-cell.header {
+            background: var(--ink);
+            color: var(--bg);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .compare-cell ul {
+            padding-left: 1.2rem;
+        }
+
+        .compare-cell li {
+            font-size: 0.88rem;
+            margin-bottom: 0.3rem;
+        }
+
+        /* Roadmap */
+        .roadmap {
+            counter-reset: step;
+            margin: 1.5rem 0;
+        }
+
+        .roadmap-item {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+        }
+
+        .roadmap-num {
+            counter-increment: step;
+            flex-shrink: 0;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--ink);
+            color: var(--bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        .roadmap-body h4 {
+            margin-top: 0;
+        }
+
+        .roadmap-body p {
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .roadmap-body .time {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* Tool cards */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin: 1.5rem 0;
+        }
+
+        .tool-card {
+            background: var(--bg);
+            padding: 1.2rem;
+            transition: background 0.15s;
+        }
+
+        .tool-card:hover {
+            background: var(--surface);
+        }
+
+        .tool-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 0.3rem;
+        }
+
+        .tool-cat {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-desc {
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        /* Alerts */
+        .note {
+            padding: 1rem 1.2rem;
+            border-radius: 4px;
+            margin: 1.2rem 0;
+            font-size: 0.9rem;
+        }
+
+        .note-red {
+            background: #fef2f0;
+            border-left: 3px solid var(--accent);
+            color: #7a2010;
+        }
+
+        .note-blue {
+            background: #f0f4fe;
+            border-left: 3px solid var(--accent2);
+            color: #102060;
+        }
+
+        .note-green {
+            background: #f0fef4;
+            border-left: 3px solid var(--accent3);
+            color: #0a3020;
+        }
+
+        .note strong {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            margin: 1.2rem 0;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        th {
+            background: var(--ink);
+            color: var(--bg);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.7rem 1rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--ink2);
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) td {
+            background: var(--surface);
+        }
+
+        /* Lists */
+        ul,
+        ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+            color: var(--ink2);
+            font-size: 0.95rem;
+        }
+
+        li strong {
+            color: var(--ink);
+        }
+
+        /* Hierarchy viz */
+        .hierarchy {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.82rem;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 6px;
+            line-height: 2;
+            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .h-l1 {
+            color: #f0a866;
+        }
+
+        .h-l2 {
+            color: #88c8f0;
+        }
+
+        .h-l3 {
+            color: #c8f088;
+        }
+
+        .h-l4 {
+            color: #f088c8;
+        }
+
+        .h-l5 {
+            color: #ffd700;
+        }
+
+        /* Footer */
+        footer {
+            margin-left: 220px;
+            background: var(--ink);
+            color: rgba(245, 240, 232, 0.4);
+            padding: 2rem 4rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            main,
+            footer {
+                margin-left: 0;
+            }
+
+            .hero,
+            .content {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+
+            .compare {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                width: 100%;
+            }
+
+            .hierarchy {
+                overflow-x: auto;
+            }
+
+            footer {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        /* Page switcher tab styles */
+        .page-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.4rem;
+            background: rgba(237, 232, 223, 0.85);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: fixed;
+            top: 1.5rem;
+            left: calc(50% + 110px);
+            transform: translateX(-50%);
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(26, 21, 16, 0.08), 0 0 1px rgba(26, 21, 16, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .switch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--muted);
+            border: 1px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .switch-btn:hover {
+            color: var(--accent);
+            background: rgba(200, 75, 47, 0.05);
+            border-color: rgba(200, 75, 47, 0.15);
+        }
+
+        .switch-btn.active {
+            background: var(--accent);
+            color: var(--bg);
+            border: 1px solid var(--accent);
+            box-shadow: 0 4px 12px rgba(200, 75, 47, 0.25);
+        }
+
+        @media (max-width: 768px) {
+            .page-switcher {
+                left: 50% !important;
+                transform: translateX(-50%);
+                top: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-switcher {
+                gap: 0.4rem;
+                padding: 0.3rem;
+                width: calc(100% - 2rem);
+                justify-content: space-evenly;
+            }
+            .switch-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.65rem;
+                gap: 0.3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Page Switcher -->
+    <div class="page-switcher">
+        <a href="ml.html" class="switch-btn"><span class="icon">📊</span> VQA Docs</a>
+        <a href="ml_guideline.html" class="switch-btn active"><span class="icon">📚</span> Theory Guide</a>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">Machine Learning<br>Engineering<br>Guide</div>
+        <nav>
+            <div class="sidebar-section">Foundations</div>
+            <a href="#what-is-ml">What is ML?</a>
+            <a href="#hierarchy">AI / ML / DL Hierarchy</a>
+            <a href="#what-is-vlm">What is VLM?</a>
+            <a href="#bot-vs-model">Bot vs Model</a>
+
+            <div class="sidebar-section">Engineering</div>
+            <a href="#how-ml-works">How ML Works</a>
+            <a href="#how-vlm-works">How VLM Works</a>
+            <a href="#training-pipeline">Training Pipeline</a>
+            <a href="#tools">Tools & Stack</a>
+
+            <div class="sidebar-section">Thesis</div>
+            <a href="#thesis-knowledge">Thesis Knowledge</a>
+            <a href="#thesis-roadmap">Learning Roadmap</a>
+            <a href="#thesis-paper">Writing the Paper</a>
+            <a href="#mistakes">Common Mistakes</a>
+        </nav>
+    </aside>
+
+    <main>
+
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-eyebrow">// Senior ML Engineer Perspective</div>
+            <h1>Machine Learning Engineering — <em>Complete</em> Guide</h1>
+            <p>From first principles to thesis paper. Everything a 4th-year CSE student needs to know, explained the way
+                a senior engineer would explain it — no fluff, no hand-holding.</p>
+        </div>
+
+        <div class="content">
+
+            <!-- 1. What is ML -->
+            <section id="what-is-ml">
+                <div class="sec-label">// Section 01</div>
+                <h2>What is Machine Learning?</h2>
+
+                <div class="pullquote">
+                    "Machine Learning is programming a computer to learn from experience instead of programming it to
+                    follow explicit rules."
+                </div>
+
+                <p>Traditional programming: you write <code>if bright_spot and irregular_shape → tumor</code>. You
+                    define every rule manually. It breaks when reality doesn't match your rules.</p>
+
+                <p>Machine learning: you give the computer 10,000 MRI images labeled "tumor" or "not tumor." The
+                    computer figures out the rules itself. It discovers patterns you never thought to write.</p>
+
+                <h3>The Core Idea — Pattern → Generalization</h3>
+                <pre>
+<span class="comment"># What ML actually does:</span>
+
+<span class="key">Data</span>         → [image1: glioma, image2: notumor, image3: glioma ...]
+<span class="key">Training</span>     → model adjusts 25M internal numbers (weights)
+               until it correctly predicts the training data
+<span class="key">Generalization</span> → model applies learned pattern to NEW images
+               it has never seen before
+
+<span class="comment"># The "learning" = adjusting weights via gradient descent
+# The "pattern" = statistical regularities in pixel values</span>
+  </pre>
+
+                <h3>Three Types of ML</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>What</th>
+                            <th>Example</th>
+                            <th>You Provide</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Supervised</strong></td>
+                            <td>Learn from labeled examples</td>
+                            <td>Tumor classification</td>
+                            <td>image + label</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Unsupervised</strong></td>
+                            <td>Find hidden structure in data</td>
+                            <td>Patient clustering</td>
+                            <td>image only</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Reinforcement</strong></td>
+                            <td>Learn via reward/punishment</td>
+                            <td>Game playing, robotics</td>
+                            <td>reward signal</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="note note-blue">
+                    <strong>Your thesis context</strong>
+                    Infant tumor detection = supervised learning. You have MRI images + radiologist labels (tumor/no
+                    tumor, tumor type). Model learns to replicate radiologist judgment.
+                </div>
+
+                <h3>What "Training" Actually Means</h3>
+                <p>Training = running an optimization algorithm (gradient descent) that minimizes a loss function. The
+                    loss measures "how wrong is the model." Training pushes loss toward zero.</p>
+
+                <pre>
+<span class="comment"># The training loop — this is ALL of machine learning:</span>
+
+for each batch of data:
+    <span class="key">forward pass</span>   → model makes prediction
+    <span class="key">compute loss</span>   → measure how wrong the prediction is
+    <span class="key">backward pass</span>  → compute gradient (which direction to adjust weights)
+    <span class="key">update weights</span> → take small step in gradient direction
+
+<span class="comment"># Repeat 10,000 times → model gets better</span>
+<span class="comment"># This is gradient descent. This is ALL of ML training.</span>
+  </pre>
+            </section>
+
+            <!-- 2. Hierarchy -->
+            <section id="hierarchy">
+                <div class="sec-label">// Section 02</div>
+                <h2>The AI / ML / DL Hierarchy</h2>
+
+                <div class="hierarchy">
+                    <span class="h-l1">Artificial Intelligence (AI)</span>
+                    <span class="h-l1">└── any technique making machines seem intelligent</span>
+
+                    <span class="h-l2"> Machine Learning (ML)</span>
+                    <span class="h-l2"> └── learns from data, no explicit rules</span>
+
+                    <span class="h-l3"> Classical ML (sklearn territory)</span>
+                    <span class="h-l3"> ├── Linear/Logistic Regression</span>
+                    <span class="h-l3"> ├── SVM, KNN, Decision Trees</span>
+                    <span class="h-l3"> └── Random Forest ← your hackathon traffic predictor</span>
+
+                    <span class="h-l3"> Deep Learning (DL)</span>
+                    <span class="h-l3"> └── neural networks with many layers</span>
+
+                    <span class="h-l4"> Computer Vision (CV)</span>
+                    <span class="h-l4"> ├── CNN (ResNet, EfficientNet) ← your baseline</span>
+                    <span class="h-l4"> └── ViT (Vision Transformer)</span>
+
+                    <span class="h-l4"> Natural Language Processing (NLP)</span>
+                    <span class="h-l4"> ├── BERT, GPT, LLaMA</span>
+                    <span class="h-l4"> └── Transformers (the architecture)</span>
+
+                    <span class="h-l5"> Vision Language Model (VLM) ← what you built</span>
+                    <span class="h-l5"> ├── combines CV + NLP</span>
+                    <span class="h-l5"> ├── LLaVA, Qwen2-VL, GPT-4V</span>
+                    <span class="h-l5"> └── image → text understanding</span>
+                </div>
+
+                <h3>Classical ML vs Deep Learning — When to use which</h3>
+                <div class="compare">
+                    <div class="compare-cell header">Classical ML</div>
+                    <div class="compare-cell header">Deep Learning</div>
+                    <div class="compare-cell">
+                        <ul>
+                            <li>Tabular data (CSV, spreadsheets)</li>
+                            <li>Small datasets (&lt;10K samples)</li>
+                            <li>Need interpretability</li>
+                            <li>Fast training on CPU</li>
+                            <li>sklearn, XGBoost</li>
+                            <li>Features manually engineered</li>
+                        </ul>
+                    </div>
+                    <div class="compare-cell">
+                        <ul>
+                            <li>Images, text, audio</li>
+                            <li>Large datasets (10K+)</li>
+                            <li>Complex patterns</li>
+                            <li>GPU required</li>
+                            <li>PyTorch, TensorFlow</li>
+                            <li>Features learned automatically</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. VLM -->
+            <section id="what-is-vlm">
+                <div class="sec-label">// Section 03</div>
+                <h2>What is a Vision Language Model?</h2>
+
+                <p>A VLM is a model that understands both images and text simultaneously. It can look at an MRI and
+                    answer questions about it in natural language.</p>
+
+                <div class="def-box">
+                    <div class="def-term">Definition</div>
+                    <p>VLM = Vision Encoder + Projection Layer + Language Model. The vision encoder converts images to
+                        vectors. The projection layer aligns image vectors with text vectors. The language model reasons
+                        over both to generate text.</p>
+                </div>
+
+                <h3>VLM Architecture — Internal Structure</h3>
+                <pre>
+Input: [MRI image] + "Does this show a tumor?"
+
+<span class="key">Step 1: Vision Encoder (ViT)</span>
+  Image → 14×14 patches → each patch tokenized
+  Output: 256 visual tokens (vectors)
+
+<span class="key">Step 2: Projection Layer (MLP)</span>
+  Visual tokens → projected to LLM's embedding space
+  This is the "bridge" between vision and language
+
+<span class="key">Step 3: LLM Backbone (Qwen2)</span>
+  [visual tokens] + [text tokens] → transformer attention
+  Model attends to both image content and question
+
+<span class="key">Step 4: Generation</span>
+  Autoregressively generates: "Yes, this MRI shows..."
+  Token by token, conditioned on image + question
+  </pre>
+
+                <h3>Why VLM over CNN for medical imaging thesis</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Capability</th>
+                            <th>CNN</th>
+                            <th>VLM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Classification</td>
+                            <td>✅ Excellent</td>
+                            <td>✅ Good</td>
+                        </tr>
+                        <tr>
+                            <td>Explanation</td>
+                            <td>❌ Just a label</td>
+                            <td>✅ Natural language</td>
+                        </tr>
+                        <tr>
+                            <td>Multi-task</td>
+                            <td>❌ One task per model</td>
+                            <td>✅ Any question</td>
+                        </tr>
+                        <tr>
+                            <td>Clinical utility</td>
+                            <td>⚠️ Limited</td>
+                            <td>✅ Doctor-friendly</td>
+                        </tr>
+                        <tr>
+                            <td>Fine-tuning complexity</td>
+                            <td>Simple</td>
+                            <td>Complex (QLoRA needed)</td>
+                        </tr>
+                        <tr>
+                            <td>Thesis novelty</td>
+                            <td>Low (done everywhere)</td>
+                            <td>High (newer, impactful)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>VLM Fine-tuning vs Training from Scratch</h3>
+                <pre>
+<span class="comment"># Training from scratch — NOT what you do:</span>
+Random weights → train on 100M image-text pairs → months → $1M+
+
+<span class="comment"># Fine-tuning — what you do:</span>
+Pretrained Qwen2-VL (already knows vision + language)
+  ↓
+Add LoRA adapters (tiny extra weights, ~0.19% of model)
+  ↓
+Train only adapters on your 800 medical samples
+  ↓
+Model adapts to your domain in ~1 hour
+  </pre>
+
+                <div class="note note-green">
+                    <strong>Key insight for thesis</strong>
+                    Fine-tuning is the industry standard. Google, Meta, every company fine-tunes pretrained models.
+                    Nobody trains VLMs from scratch except the 5 labs that have the compute budget. Your thesis
+                    contribution is the fine-tuning methodology + domain adaptation + evaluation, not building the
+                    architecture.
+                </div>
+            </section>
+
+            <!-- 4. Bot vs Model -->
+            <section id="bot-vs-model">
+                <div class="sec-label">// Section 04</div>
+                <h2>Training a Bot vs Training a Model</h2>
+
+                <div class="pullquote">
+                    "A model is the brain. A bot is the body around the brain. Training a model = teaching it to think.
+                    Building a bot = giving it arms and a mouth."
+                </div>
+
+                <div class="compare">
+                    <div class="compare-cell header">Training a Model</div>
+                    <div class="compare-cell header">Training a Bot</div>
+                    <div class="compare-cell">
+                        <ul>
+                            <li>Adjusting neural network weights</li>
+                            <li>Requires labeled dataset + GPU</li>
+                            <li>Output: .pth / .safetensors file</li>
+                            <li>Weeks to months of work</li>
+                            <li>ML engineer territory</li>
+                            <li>Tools: PyTorch, HuggingFace, PEFT</li>
+                            <li>Example: fine-tuning Qwen2-VL on tumor images</li>
+                        </ul>
+                    </div>
+                    <div class="compare-cell">
+                        <ul>
+                            <li>Defining persona, instructions, rules</li>
+                            <li>No dataset needed — prompt engineering</li>
+                            <li>Output: system prompt + API config</li>
+                            <li>Hours to days of work</li>
+                            <li>Product / software engineer territory</li>
+                            <li>Tools: OpenAI API, LangChain, n8n</li>
+                            <li>Example: TSA chatbot (LLaMA 3.3 + RAG)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Where they overlap — RLHF</h3>
+                <p>Reinforcement Learning from Human Feedback (RLHF) is where model training meets bot behavior. ChatGPT
+                    was trained via RLHF — humans rated outputs, those ratings trained a reward model, the reward model
+                    trained GPT to be helpful and safe. This is advanced ML engineering, not relevant to your thesis but
+                    important to know conceptually.</p>
+
+                <h3>Your TSA chatbot vs your thesis model</h3>
+                <pre>
+<span class="comment"># TSA Chatbot (bot, not model training):</span>
+LLaMA 3.3 70B (pretrained by Meta) → you didn't train this
+RAG pipeline → retrieves context from Pinecone
+System prompt → defines behavior
+Result: a "bot" using someone else's model
+
+<span class="comment"># Thesis Model (actual model training):</span>
+Qwen2-VL 2B (pretrained by Alibaba) → you fine-tune this
+QLoRA → you adjust the weights
+Your dataset → you provide the signal
+Result: a model with YOUR weights that YOU trained
+  </pre>
+            </section>
+
+            <!-- 5. How ML Works -->
+            <section id="how-ml-works">
+                <div class="sec-label">// Section 05</div>
+                <h2>How Machine Learning Actually Works</h2>
+
+                <h3>The Mathematics (simplified)</h3>
+                <pre>
+<span class="comment"># A neural network is just:</span>
+output = activation(weights × input + bias)
+
+<span class="comment"># Training = finding the right weights
+# Loss function = measures wrongness</span>
+loss = mean((predictions - true_labels)²)   <span class="comment"># MSE</span>
+loss = -sum(true × log(predicted))          <span class="comment"># CrossEntropy (classification)</span>
+
+<span class="comment"># Gradient descent = walking downhill on loss landscape</span>
+weight = weight - learning_rate × gradient_of_loss
+
+<span class="comment"># Backpropagation = chain rule to compute gradients
+# This is what loss.backward() does in PyTorch</span>
+  </pre>
+
+                <h3>Key Concepts Every ML Engineer Must Know</h3>
+
+                <h4>Overfitting vs Underfitting</h4>
+                <pre>
+Underfitting: model too simple → high train loss, high val loss
+              Fix: bigger model, more features, more epochs
+
+Overfitting:  model memorized training data → low train loss, HIGH val loss
+              Fix: more data, dropout, regularization, early stopping
+
+Sweet spot:   low train loss AND low val loss → generalization
+  </pre>
+
+                <h4>Train / Validation / Test Split</h4>
+                <pre>
+Train set (70-80%): model learns from this
+Val set   (10-15%): tune hyperparameters, monitor overfitting
+Test set  (10-15%): NEVER touch until final evaluation
+                    final reported accuracy comes from here
+
+<span class="comment"># Common mistake: tuning on test set → inflated results → paper rejected</span>
+  </pre>
+
+                <h4>Learning Rate — The Most Critical Hyperparameter</h4>
+                <pre>
+Too high: loss oscillates or explodes — never converges
+Too low:  loss decreases but very slowly — wastes compute
+Just right: loss curves smoothly downward
+
+<span class="comment"># General rules:</span>
+Full fine-tuning:  1e-5 to 1e-4
+LoRA fine-tuning:  1e-4 to 3e-4
+CNN last layer:    1e-3 to 1e-4
+Training from scratch: 1e-3 with warmup
+  </pre>
+
+                <h4>Batch Size and Gradient Accumulation</h4>
+                <pre>
+<span class="comment"># Batch size = how many samples per weight update</span>
+Large batch: stable gradients, needs more VRAM
+Small batch: noisy gradients, but can fit in limited VRAM
+
+<span class="comment"># Gradient accumulation = simulate large batch with small VRAM</span>
+batch_size=2, gradient_accumulation=8
+→ effective batch = 16 (update every 8 steps)
+→ same math, less VRAM
+  </pre>
+
+                <h3>Metrics — What to Measure</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Formula</th>
+                            <th>When critical</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Accuracy</strong></td>
+                            <td>correct / total</td>
+                            <td>Balanced datasets</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Precision</strong></td>
+                            <td>TP / (TP+FP)</td>
+                            <td>When false positives are costly</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Recall (Sensitivity)</strong></td>
+                            <td>TP / (TP+FN)</td>
+                            <td>Medical: missing tumor = catastrophic</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Specificity</strong></td>
+                            <td>TN / (TN+FP)</td>
+                            <td>Medical: false alarm rate</td>
+                        </tr>
+                        <tr>
+                            <td><strong>F1 Score</strong></td>
+                            <td>2×(P×R)/(P+R)</td>
+                            <td>Imbalanced datasets</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AUC-ROC</strong></td>
+                            <td>area under ROC curve</td>
+                            <td>Medical AI papers, gold standard</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="note note-red">
+                    <strong>Thesis critical</strong>
+                    In medical AI, Recall/Sensitivity is more important than Accuracy. Missing a tumor (False Negative)
+                    is far worse than a false alarm (False Positive). Always report both. Papers that only report
+                    accuracy get rejected.
+                </div>
+            </section>
+
+            <!-- 6. How VLM Works -->
+            <section id="how-vlm-works">
+                <div class="sec-label">// Section 06</div>
+                <h2>How VLM Learning Works</h2>
+
+                <h3>The Transformer — Foundation of Everything Modern</h3>
+                <pre>
+<span class="comment"># Attention mechanism (core of transformer):</span>
+"Which parts of the input should I focus on?"
+
+For text: "The tumor [in the frontal lobe] appears malignant"
+          ↑ model attends to [in the frontal lobe] when processing "malignant"
+
+For vision: each image patch attends to related patches
+            patch of tumor mass attends to surrounding tissue
+
+For VLM: text tokens attend to image patches and other text
+          "where is it?" → model attends to spatial image regions
+  </pre>
+
+                <h3>LoRA — Why It Works</h3>
+                <pre>
+<span class="comment"># Full fine-tuning:</span>
+All 2B weights updated → 2B gradients stored → 16GB VRAM → expensive
+
+<span class="comment"># LoRA insight: weight updates are low-rank</span>
+ΔW = A × B  (where A is n×r, B is r×n, r << n)
+r=8, n=4096 → A is 4096×8, B is 8×4096
+Parameters: 4096×8 + 8×4096 = 65,536 (vs 4096×4096 = 16M)
+VRAM saving: ~250× fewer parameters to train
+
+<span class="comment"># QLoRA adds quantization on top:</span>
+Base model in 4-bit (frozen) → ~1GB
+LoRA adapters in fp16 (trainable) → ~50MB
+Total VRAM: ~4GB vs 16GB for full fine-tuning
+  </pre>
+
+                <h3>Vision Encoder Deep Dive (ViT)</h3>
+                <pre>
+Input image: 336×336 pixels
+↓
+Split into 14×14 patches (each 24×24 pixels)
+↓
+Each patch → linear embedding (flatten + project to 768-dim vector)
+↓
+Add position embedding (tells model WHERE each patch is)
+↓
+Stack of transformer layers → patches attend to each other
+↓
+Output: 576 visual tokens, each 768-dim
+These are the "image features" fed to the LLM
+  </pre>
+
+                <h3>Why Label Masking is Critical in VLM Fine-tuning</h3>
+                <pre>
+<span class="comment"># Input sequence to model:</span>
+[IMG_TOKEN × 576] [QUESTION_TOKENS] [ANSWER_TOKENS]
+
+<span class="comment"># Without masking (WRONG):</span>
+Loss computed on ALL tokens including question
+Model learns to predict question tokens too
+Result: model memorizes question format, not answer content
+Symptom: loss stuck at high value (9.3 in your case)
+
+<span class="comment"># With masking (CORRECT):</span>
+Question labels → -100 (PyTorch ignores these in loss)
+Loss computed ONLY on answer tokens
+Model learns to generate correct answers
+Symptom: loss drops properly (17 → 5.8 in your case)
+  </pre>
+            </section>
+
+            <!-- 7. Training Pipeline -->
+            <section id="training-pipeline">
+                <div class="sec-label">// Section 07</div>
+                <h2>Complete ML Training Pipeline</h2>
+
+                <p>Every ML project, from tumor detection to self-driving cars, follows this pipeline. Know this cold.
+                </p>
+
+                <pre>
+<span class="key">1. Problem Definition</span>
+   What are inputs? What are outputs? What metric matters?
+   Medical: inputs=MRI, output=diagnosis, metric=sensitivity
+
+<span class="key">2. Data Collection & Annotation</span>
+   Raw data → labeled dataset
+   Medical: DICOM files + radiologist annotations
+
+<span class="key">3. Data Preprocessing</span>
+   DICOM → PNG → normalize → resize → augment
+   Split: 70% train / 15% val / 15% test
+
+<span class="key">4. Exploratory Data Analysis (EDA)</span>
+   Class balance? Image quality? Outliers?
+   If imbalanced: use weighted loss or oversampling
+
+<span class="key">5. Baseline Model</span>
+   Simplest model that works (ResNet-50, logistic regression)
+   Sets the bar everything else must beat
+
+<span class="key">6. Model Selection & Architecture</span>
+   Based on data type, size, compute budget
+   Image: CNN or ViT | Text: Transformer | Both: VLM
+
+<span class="key">7. Training</span>
+   Set hyperparameters → train → monitor loss curves
+   Watch for: divergence, plateau, overfitting
+
+<span class="key">8. Evaluation</span>
+   Run on TEST set (never val set)
+   Report: accuracy, sensitivity, specificity, AUC-ROC
+
+<span class="key">9. Error Analysis</span>
+   Which samples did model get wrong? Why?
+   Grad-CAM: what is model looking at?
+
+<span class="key">10. Iteration</span>
+    More data? Better augmentation? Different architecture?
+    Repeat steps 3-9 until satisfied
+
+<span class="key">11. Deployment</span>
+    Quantize → serve via API → monitor in production
+  </pre>
+            </section>
+
+            <!-- 8. Tools -->
+            <section id="tools">
+                <div class="sec-label">// Section 08</div>
+                <h2>Tools & Stack — Complete ML Engineer Toolkit</h2>
+
+                <h3>Core Deep Learning</h3>
+                <div class="tool-grid">
+                    <div class="tool-card">
+                        <div class="tool-name">PyTorch</div>
+                        <div class="tool-cat">Framework</div>
+                        <div class="tool-desc">Industry standard for research and production. Dynamic graphs, full
+                            control. Learn this deeply.</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">Transformers (HF)</div>
+                        <div class="tool-cat">Model Hub</div>
+                        <div class="tool-desc">100K+ pretrained models. AutoModel, Trainer API, pipelines. Your primary
+                            interface to SOTA models.</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">PEFT</div>
+                        <div class="tool-cat">Fine-tuning</div>
+                        <div class="tool-desc">LoRA, QLoRA, IA3, prefix tuning. Parameter-efficient methods. Essential
+                            for large model fine-tuning.</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">TRL</div>
+                        <div class="tool-cat">RLHF / SFT</div>
+                        <div class="tool-desc">Supervised fine-tuning, RLHF, DPO. SFTTrainer is cleaner than raw Trainer
+                            for instruction tuning.</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">Accelerate</div>
+                        <div class="tool-cat">Distributed</div>
+                        <div class="tool-desc">Multi-GPU, mixed precision, DeepSpeed integration. Single line to scale
+                            training.</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">BitsAndBytes</div>
+                        <div class="tool-cat">Quantization</div>
+                        <div class="tool-desc">4-bit and 8-bit quantization. Enables running 7B+ models on consumer
+                            GPUs.</div>
+                    </div>
+                </div>
+
+                <h3>Data & Preprocessing</h3>
+                <div class="tool-grid">
+                    <div class="tool-card">
+                        <div class="tool-name">NumPy / Pandas</div>
+                        <div class="tool-cat">Data</div>
+                        <div class="tool-desc">Array operations and dataframes. Foundation of all data manipulation.
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">Pillow / OpenCV</div>
+                        <div class="tool-cat">Vision</div>
+                        <div class="tool-desc">Image loading, resizing, color conversion. OpenCV for advanced
+                            operations.</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">pydicom</div>
+                        <div class="tool-cat">Medical</div>
+                        <div class="tool-desc">Read DICOM files from MRI/CT scanners. Critical for your thesis dataset.
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">Albumentations</div>
+                        <div class="tool-cat">Augmentation</div>
+                        <div class="tool-desc">Medical-grade image augmentation. Faster than torchvision transforms.
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">HF Datasets</div>
+                        <div class="tool-cat">Data Pipeline</div>
+                        <div class="tool-desc">Efficient data loading with caching, streaming, and map operations.</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">scikit-learn</div>
+                        <div class="tool-cat">Classical ML</div>
+                        <div class="tool-desc">Metrics, preprocessing, classical models. torchmetrics for DL metrics.
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Experiment Tracking & Evaluation</h3>
+                <div class="tool-grid">
+                    <div class="tool-card">
+                        <div class="tool-name">Weights & Biases</div>
+                        <div class="tool-cat">Tracking</div>
+                        <div class="tool-desc">Loss curves, system metrics, hyperparameter sweeps, model comparison.
+                            Free tier sufficient.</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">Grad-CAM</div>
+                        <div class="tool-cat">Explainability</div>
+                        <div class="tool-desc">Visualize what CNN/ViT focuses on. Critical for medical AI papers.</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">torchmetrics</div>
+                        <div class="tool-cat">Metrics</div>
+                        <div class="tool-desc">AUC-ROC, F1, confusion matrix, sensitivity/specificity. GPU-accelerated.
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Deployment & Serving</h3>
+                <div class="tool-grid">
+                    <div class="tool-card">
+                        <div class="tool-name">Gradio</div>
+                        <div class="tool-cat">Demo UI</div>
+                        <div class="tool-desc">Fastest path to shareable demo. HF Spaces native. Use for thesis demo.
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">FastAPI</div>
+                        <div class="tool-cat">API Server</div>
+                        <div class="tool-desc">Production inference API. Async, fast, OpenAPI docs auto-generated.</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">vLLM</div>
+                        <div class="tool-cat">LLM Serving</div>
+                        <div class="tool-desc">High-throughput LLM inference. PagedAttention. 10-30× faster than HF
+                            generate.</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">Docker</div>
+                        <div class="tool-cat">Container</div>
+                        <div class="tool-desc">Package model + dependencies + server. Runs anywhere. Production
+                            standard.</div>
+                    </div>
+                </div>
+
+                <h3>Compute & Cloud</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Platform</th>
+                            <th>Free GPU</th>
+                            <th>Best For</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Kaggle</strong></td>
+                            <td>T4 ×2, 30hr/week</td>
+                            <td>Training (what you used)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Google Colab</strong></td>
+                            <td>T4, limited hours</td>
+                            <td>Quick experiments</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HuggingFace Spaces</strong></td>
+                            <td>CPU free, ZeroGPU</td>
+                            <td>Demo deployment</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lightning AI</strong></td>
+                            <td>22hr/month GPU</td>
+                            <td>Alternative to Colab</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Vast.ai</strong></td>
+                            <td>Paid, cheap A100</td>
+                            <td>When need more than T4</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 9. Thesis Knowledge -->
+            <section id="thesis-knowledge">
+                <div class="sec-label">// Section 09</div>
+                <h2>What You Need to Know for ML Thesis</h2>
+
+                <h3>Mathematics prerequisites</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Topic</th>
+                            <th>Why Needed</th>
+                            <th>Depth Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Linear Algebra</td>
+                            <td>Tensors, matrix ops, attention</td>
+                            <td>Matrix multiply, dot product, eigenvalues</td>
+                        </tr>
+                        <tr>
+                            <td>Calculus</td>
+                            <td>Backpropagation, gradient descent</td>
+                            <td>Chain rule, partial derivatives</td>
+                        </tr>
+                        <tr>
+                            <td>Probability & Statistics</td>
+                            <td>Loss functions, metrics, Bayesian methods</td>
+                            <td>Distributions, expectation, conditional probability</td>
+                        </tr>
+                        <tr>
+                            <td>Information Theory</td>
+                            <td>Cross-entropy loss, KL divergence</td>
+                            <td>Entropy, mutual information</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="note note-blue">
+                    <strong>Honest reality</strong>
+                    You don't need to derive backprop by hand for a thesis. But you must understand conceptually why
+                    cross-entropy is used for classification, why sigmoid vs softmax, why Adam vs SGD. Reviewers ask
+                    these questions in viva.
+                </div>
+
+                <h3>Deep Learning concepts to understand deeply</h3>
+                <ul>
+                    <li><strong>Activation functions</strong> — ReLU, GELU, Sigmoid, Softmax — what each does, when to
+                        use</li>
+                    <li><strong>Normalization</strong> — Batch Norm, Layer Norm — why they stabilize training</li>
+                    <li><strong>Dropout</strong> — what it is, why it prevents overfitting</li>
+                    <li><strong>Attention mechanism</strong> — self-attention, cross-attention — the core of
+                        transformers</li>
+                    <li><strong>Positional encoding</strong> — why transformers need position info (unlike RNNs)</li>
+                    <li><strong>Transfer learning</strong> — pretraining vs fine-tuning, frozen vs unfrozen layers</li>
+                    <li><strong>Data augmentation</strong> — flipping, rotation, mixup — why it improves generalization
+                    </li>
+                    <li><strong>Class imbalance</strong> — weighted loss, oversampling, SMOTE</li>
+                </ul>
+
+                <h3>Medical AI specific knowledge</h3>
+                <ul>
+                    <li><strong>DICOM format</strong> — standard for medical imaging, metadata contains patient info
+                    </li>
+                    <li><strong>Windowing</strong> — adjusting contrast in CT/MRI to highlight different tissues</li>
+                    <li><strong>Sensitivity vs Specificity tradeoff</strong> — ROC curve, how to choose operating point
+                    </li>
+                    <li><strong>IRB / Ethics</strong> — patient data anonymization, consent, institutional approval</li>
+                    <li><strong>Grad-CAM / Saliency maps</strong> — showing clinicians what the model "sees"</li>
+                    <li><strong>Inter-rater reliability</strong> — multiple radiologists annotating, measuring agreement
+                        (Cohen's Kappa)</li>
+                </ul>
+            </section>
+
+            <!-- 10. Roadmap -->
+            <section id="thesis-roadmap">
+                <div class="sec-label">// Section 10</div>
+                <h2>Learning Roadmap — 6 Month Plan</h2>
+
+                <div class="roadmap">
+
+                    <div class="roadmap-item">
+                        <div class="roadmap-num">1</div>
+                        <div class="roadmap-body">
+                            <div class="time">Month 1</div>
+                            <h4>PyTorch Fundamentals Solidified</h4>
+                            <p>Tensors, autograd, nn.Module, DataLoader, training loops. Build a CNN from scratch on
+                                MNIST. Understand every line. Resource: <code>pytorch.org/tutorials</code> — Deep
+                                Learning with PyTorch: A 60 Minute Blitz.</p>
+                        </div>
+                    </div>
+
+                    <div class="roadmap-item">
+                        <div class="roadmap-num">2</div>
+                        <div class="roadmap-body">
+                            <div class="time">Month 1-2</div>
+                            <h4>HuggingFace Ecosystem</h4>
+                            <p>AutoModel, AutoTokenizer, Trainer API, Pipeline API, Datasets library. Fine-tune BERT on
+                                text classification. Fine-tune ResNet on custom images. HF course:
+                                <code>huggingface.co/learn/nlp-course</code></p>
+                        </div>
+                    </div>
+
+                    <div class="roadmap-item">
+                        <div class="roadmap-num">3</div>
+                        <div class="roadmap-body">
+                            <div class="time">Month 2</div>
+                            <h4>Attention & Transformers</h4>
+                            <p>Understand self-attention mathematically. Read "Attention Is All You Need" (Vaswani et
+                                al., 2017). Implement a toy transformer. Understand why transformers replaced RNNs. "The
+                                Illustrated Transformer" by Jay Alammar.</p>
+                        </div>
+                    </div>
+
+                    <div class="roadmap-item">
+                        <div class="roadmap-num">4</div>
+                        <div class="roadmap-body">
+                            <div class="time">Month 2-3</div>
+                            <h4>VLM Architecture & Fine-tuning</h4>
+                            <p>Read LLaVA paper (Liu et al., 2023). Understand ViT architecture. Practice QLoRA
+                                fine-tuning on medical dataset. LLaVA-Med paper for medical VLM context. Your current
+                                project experience applies here.</p>
+                        </div>
+                    </div>
+
+                    <div class="roadmap-item">
+                        <div class="roadmap-num">5</div>
+                        <div class="roadmap-body">
+                            <div class="time">Month 3-4</div>
+                            <h4>Medical AI Specific</h4>
+                            <p>pydicom for DICOM processing. Medical image augmentation (elastic deformation, intensity
+                                shifts). Sensitivity/Specificity/AUC-ROC. Grad-CAM implementation. Read 5 recent papers
+                                on medical VLM (2023-2024).</p>
+                        </div>
+                    </div>
+
+                    <div class="roadmap-item">
+                        <div class="roadmap-num">6</div>
+                        <div class="roadmap-body">
+                            <div class="time">Month 4-5</div>
+                            <h4>Thesis Experiments</h4>
+                            <p>Your infant tumor dataset → DICOM preprocessing → CNN baseline → VLM fine-tuning →
+                                ablation studies → metric analysis → Grad-CAM visualization.</p>
+                        </div>
+                    </div>
+
+                    <div class="roadmap-item">
+                        <div class="roadmap-num">7</div>
+                        <div class="roadmap-body">
+                            <div class="time">Month 5-6</div>
+                            <h4>Paper Writing</h4>
+                            <p>LaTeX or Word. Standard structure: Abstract → Introduction → Related Work → Methodology →
+                                Experiments → Results → Conclusion. Use IEEE or Springer template based on target venue.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- 11. Writing the Paper -->
+            <section id="thesis-paper">
+                <div class="sec-label">// Section 11</div>
+                <h2>Writing the ML Thesis Paper</h2>
+
+                <h3>Standard Paper Structure</h3>
+                <pre>
+<span class="key">Abstract</span> (200 words)
+  Problem + Method + Key result + Significance
+  Write this LAST
+
+<span class="key">1. Introduction</span>
+  - Clinical problem (infant tumor diagnosis is hard/slow/expensive)
+  - Gap (existing methods lack explainability)
+  - Your contribution (VLM fine-tuned with QLoRA + clinical language)
+  - Paper organization
+
+<span class="key">2. Related Work</span>
+  - CNN-based tumor detection (cite 5-10 papers)
+  - VLMs in medical imaging (LLaVA-Med, BiomedGPT)
+  - Fine-tuning methods (LoRA, QLoRA papers)
+  - What gap your work fills
+
+<span class="key">3. Methodology</span>
+  - Dataset description (your infant dataset + augmentation)
+  - Model architecture (Qwen2-VL / LLaVA-Med + LoRA config)
+  - Training setup (hyperparameters, hardware, epochs)
+  - Evaluation protocol (train/val/test split, metrics)
+
+<span class="key">4. Experiments & Results</span>
+  - Quantitative: accuracy, sensitivity, specificity, AUC-ROC
+  - Qualitative: example predictions with Grad-CAM
+  - Ablation study: with vs without fine-tuning, different r values
+  - Comparison: CNN baseline vs VLM
+
+<span class="key">5. Discussion</span>
+  - Why VLM outperforms/differs from CNN
+  - Clinical implications
+  - Limitations (small dataset, single institution)
+
+<span class="key">6. Conclusion</span>
+  - Summary of contributions
+  - Future work
+
+<span class="key">References</span>
+  - Use Zotero or Mendeley to manage citations
+  </pre>
+
+                <h3>Ablation Study — What it is and why you need one</h3>
+                <div class="def-box">
+                    <div class="def-term">Ablation Study</div>
+                    <p>Remove one component at a time to prove each component contributes. Example: "VLM without
+                        fine-tuning: 50% accuracy. With fine-tuning: 78%. Fine-tuning contributes +28%." This proves
+                        your methodology choices are justified, not arbitrary.</p>
+                </div>
+
+                <h3>Essential papers to read before writing</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Paper</th>
+                            <th>Why Read</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Attention Is All You Need (2017)</td>
+                            <td>Foundation of all transformers</td>
+                        </tr>
+                        <tr>
+                            <td>An Image is Worth 16×16 Words — ViT (2020)</td>
+                            <td>Vision transformer foundation</td>
+                        </tr>
+                        <tr>
+                            <td>LLaVA: Visual Instruction Tuning (2023)</td>
+                            <td>VLM fine-tuning methodology</td>
+                        </tr>
+                        <tr>
+                            <td>QLoRA: Efficient Fine-tuning (2023)</td>
+                            <td>Your training method — must cite</td>
+                        </tr>
+                        <tr>
+                            <td>LLaVA-Med (2023)</td>
+                            <td>Medical VLM — closest related work</td>
+                        </tr>
+                        <tr>
+                            <td>Grad-CAM (2017)</td>
+                            <td>Explainability method you'll use</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 12. Mistakes -->
+            <section id="mistakes">
+                <div class="sec-label">// Section 12</div>
+                <h2>Common Mistakes — Senior Engineer Perspective</h2>
+
+                <div class="note note-red">
+                    <strong>Mistake 1: Reporting accuracy on imbalanced data</strong>
+                    If 90% of samples are "no tumor", a model that always predicts "no tumor" gets 90% accuracy. Always
+                    report sensitivity + specificity + AUC-ROC for medical datasets.
+                </div>
+
+                <div class="note note-red">
+                    <strong>Mistake 2: Touching test set during development</strong>
+                    Use val set for tuning. Test set is sacred — only evaluate once at the end. Repeated evaluation on
+                    test set = data leakage = inflated results = paper rejected.
+                </div>
+
+                <div class="note note-red">
+                    <strong>Mistake 3: No ablation study</strong>
+                    "Our model achieves 92%" means nothing without: what does it achieve without fine-tuning? Without
+                    augmentation? Without your specific architecture choice? Ablations prove your contribution.
+                </div>
+
+                <div class="note note-red">
+                    <strong>Mistake 4: Missing label masking in VLM fine-tuning</strong>
+                    This is the most common VLM fine-tuning bug. Loss gets stuck because model learns to predict
+                    questions too. Always mask question tokens to -100.
+                </div>
+
+                <div class="note note-red">
+                    <strong>Mistake 5: Using latest Python for ML</strong>
+                    Python 3.14 caused scipy/torch conflicts. Always use Python 3.10 or 3.11 for ML projects. Stability
+                    &gt; newest features.
+                </div>
+
+                <div class="note note-red">
+                    <strong>Mistake 6: Training on full dataset before verifying pipeline</strong>
+                    Test with 100 samples first. Verify loss decreases. Verify inference works. Then scale to full
+                    dataset. Saves hours of wasted GPU time.
+                </div>
+
+                <div class="note note-red">
+                    <strong>Mistake 7: Not saving checkpoints</strong>
+                    Kaggle sessions timeout. Colab disconnects. Always save_pretrained every epoch. Never run a
+                    multi-hour job without checkpointing.
+                </div>
+
+                <div class="note note-green">
+                    <strong>Best practice: Reproducibility</strong>
+                    Set random seeds everywhere. Log all hyperparameters. Save training config alongside model. Another
+                    person running your code should get the same results. Papers without reproducibility details get
+                    rejected.
+                </div>
+
+                <pre>
+<span class="comment"># Reproducibility setup — put at top of every training script:</span>
+import torch, numpy, random
+
+SEED = 42
+random.seed(SEED)
+numpy.random.seed(SEED)
+torch.manual_seed(SEED)
+torch.cuda.manual_seed_all(SEED)
+torch.backends.cudnn.deterministic = True
+  </pre>
+            </section>
+
+        </div><!-- end .content -->
+
+    </main>
+
+    <footer>
+        <p>ML Engineering Guide · Senior Engineer Perspective · For AUST CSE 4th Year Thesis Preparation</p>
+        <p style="margin-top:0.3rem; opacity:0.4;">// PyTorch · HuggingFace · PEFT · QLoRA · VLM · Medical AI</p>
+    </footer>
+
+</body>
+
+</html>
